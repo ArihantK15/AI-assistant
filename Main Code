@@ -73,7 +73,6 @@ else:
 print(f"\nVoice: {greeting}")
 speak(greeting)
 while True:
-
     get_audio()
     print("Gemini is listening...")
 
