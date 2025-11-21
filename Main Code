@@ -1,0 +1,79 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import wikipedia
+import webbrowser
+import pyjokes
+import google.generativeai as genai
+from gtts import gTTS
+import os
+import pywhatkit
+
+api_key = "YOUR_API_KEY"  #from google AI studio
+genai.configure(api_key=api_key)
+
+model = genai.GenerativeModel("models/gemini-2.5-flash-lite") 
+
+def speak(text,speed_factor=1.3):
+    try:
+        tts = gTTS(text=text, lang='en', slow=False)
+ 
+        filename = "temp_ai_voice.mp3"
+        tts.save(filename)
+        
+        os.system(f"afplay -r {speed_factor} {filename}") 
+        
+        os.remove(filename)
+    except Exception as e:
+        print(f"Error in TTS: {e}")
+def get_audio():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1.5
+        audio = r.listen(source)
+        said=""
+        try:
+            said = r.recognize_google(audio)
+            if "youtube" in said.lower():
+                search_query = said.replace("youtube", "")
+                print(f"Searching YouTube for: {search_query}")
+                pywhatkit.playonyt(search_query)
+            elif "wikipedia" in said.lower():
+                speak("Searching Wikipedia...")
+                query = said.replace("wikipedia", "")
+                results = wikipedia.summary(query, sentences=2)
+                print(f"Wikipedia says: {results}")
+                speak(results)
+            elif "joke" in said.lower():
+                joke = pyjokes.get_joke()
+                print(f"Here's a joke: {joke}")
+                speak(joke)
+            elif "exit" in said.lower() or "quit" in said.lower() or "thank you" in said.lower():
+                print("Thank You For Visiting")
+                speak("Thank You For Visiting")
+                exit()
+            else:
+                response = model.generate_content(f"give me a short response: {said}")
+                clean_text = response.text.replace("*", "")
+                print(f"\nResponse:\n{response.text}")
+                speak(clean_text)
+        except Exception as e:
+            speak("Sorry, I did not get that. Please try again.")
+    return said
+    
+
+hour = int(datetime.datetime.now().hour)
+if 0 <= hour < 12:
+    greeting = "Good Morning Arihant, How may I assist you today?"
+elif 12 <= hour < 18:
+    greeting = "Good Afternoon Arihant, How may I assist you today?"
+else:
+    greeting = "Good Evening Arihant, How may I assist you today?"
+print(f"\nVoice: {greeting}")
+speak(greeting)
+while True:
+
+    get_audio()
+    print("Gemini is listening...")
+
