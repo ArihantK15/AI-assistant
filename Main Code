@@ -9,6 +9,7 @@ from gtts import gTTS
 import os
 import pywhatkit
 
+
 api_key = "YOUR_API_KEY"  #from google AI studio
 genai.configure(api_key=api_key)
 
@@ -53,6 +54,11 @@ def get_audio():
                 print("Thank You For Visiting")
                 speak("Thank You For Visiting")
                 exit()
+            elif "weather" in said.lower():
+                response = model.generate_content(f"give me a short weather report for today in 50 words")
+                clean_text = response.text.replace("*", "")
+                print(f"\nWeather Report:\n{response.text}")
+                speak(clean_text)
             else:
                 response = model.generate_content(f"give me a short response: {said}")
                 clean_text = response.text.replace("*", "")
